@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+const int mxn = 1e5;
+
+int n, m, c;
+long long r;
+int k;
+
+vector<pair<int,long long> > g[mxn];
+void getInput(){
+    cin >> n >> m >> c >> r >> k;
+    for(int i = 0; i < m; i ++){
+        int u, v;
+        long long l;
+        cin >> u >> v >> l;
+        --u;
+        --v;
+        g[u].push_back({v, l});
+        g[v].push_back({u, l});
+    }
+}
+int vis[mxn];
+vector<pair<long long, int> > D[mxn];
+
+
+bool check(int u, int source){
+    for(auto e : D[u]){
+        if(e.second == source) return false;
+    }
+    return true;
+}
+
+void Dijkstra(){
+    priority_queue<pair<long long, pair<int,int> > > Q;
+    for(int i = 0; i < c; i ++){
+        Q.push({0, {i, i}});
+        D[i].push_back({0, i});
+    }
+    while(!Q.empty()){
+        int node = Q.top().second.second;
+        int source= Q.top().second.first;
+        long long dis =   -Q.top().first;
+        Q.pop();
+        if(vis[node] >= k) continue;
+        vis[node] ++;
+        for(auto u : g[node]){
+            long long tot_dis = dis + u.second;
+            if(tot_dis > r) continue;
+            if(!check(u.first, source)) continue;
+            
+            if(D[u.first].size() < k){
+                D[u.first].push_back({tot_dis, source});
+                sort(D[u.first].begin(), D[u.first].end());
+                Q.push({-tot_dis, {source, u.first}});
+            }
+            else if(tot_dis < D[u.first].back().first){
+                D[u.first].pop_back();
+                D[u.first].push_back({tot_dis, source});
+                sort(D[u.first].begin(), D[u.first].end());
+                Q.push({-tot_dis, {source, u.first}});
+            }
+        }
+    }
+}
+int main(){
+    getInput();
+    Dijkstra();
+    int ans = 0;
+    for(int i = c; i < n; i ++){
+        if(vis[i] == k) ans ++;
+    }
+    cout<<ans<<endl;
+    for(int i = c; i < n; i ++){
+        if(vis[i] == k) cout<<i+1<<endl;
+    }
+    return 0;
+}
+//3 3 1 4 1
+//1 2 3
+//1 3 5
+//2 3 2
+
+
+//4 3 2 101 2
+//1 2 1
+//2 3 100
+//1 4 10
+
+
+//4 3 2 100 2
+//1 2 1
+//2 3 100
+//1 4 10

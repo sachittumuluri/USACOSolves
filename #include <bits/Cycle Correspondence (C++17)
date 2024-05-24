@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+
+int n, k;
+
+int a[500000];
+int b[500000];
+
+
+int pos1[500000];
+int pos2[500000];
+int  cnt[500000];
+int process(){
+    
+    memset(pos1, -1, sizeof(pos1));
+    memset(pos2, -1, sizeof(pos2));
+    memset(cnt ,  0, sizeof( cnt));
+    for(int i = 0; i < k; i ++){
+        pos1[a[i]] = i;
+    }
+    for(int i = 0; i < k; i ++){
+        pos2[b[i]] = i;
+    }
+    for(int i = 0; i < n; i ++){
+        if(pos1[i] != -1 && pos2[i] != -1){
+            int delta;
+            if(pos1[i] <= pos2[i]){
+                delta = pos2[i] - pos1[i];
+            }
+            else{
+                delta = k - pos1[i] + pos2[i];
+            }
+            cnt[delta] ++;
+        }
+    }
+    int ret = 0;
+    for(int i = 0; i < k; i ++){
+        ret = max(ret, cnt[i]);
+    }
+    return ret;
+}
+
+int main(){
+    cin >> n >> k;
+    for(int i = 0; i < k; i ++){
+        cin >> a[i];
+        --a[i];
+    }
+    for(int i = 0; i < k; i ++){
+        cin >> b[i];
+        --b[i];
+    }
+    int r1 = process();
+    reverse(b, b + k);
+    int r2 = process();
+    
+    int ans = max(r1, r2);
+    for(int i = 0; i < n; i ++){
+        if(pos1[i] == -1 && pos2[i] == -1){
+            ans ++;
+        }
+    }
+    cout<<ans<<endl;
+    return 0;
+}

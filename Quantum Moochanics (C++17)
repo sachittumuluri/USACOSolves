@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+#define ld long double
+#define N (int)(2e5+10)
+
+using namespace std;
+
+struct Str{
+
+    ll num;
+    ld time;
+    int i, j;
+
+    bool operator>(const Str& a) const {
+        if (num > a.num) return 1;
+        if (num < a.num) return 0;
+        return time > a.time;
+    }
+};
+
+ll n, m, a[N], b[N], l[N], r[N], ans[N];
+bool f[N];
+
+pair<ll, ld> Calc(int i, int j){
+
+    if (i % 2 == j % 2) return {0, 0};
+    if (i > j) swap(i, j);
+    ll k = (a[j] - a[i]) / (b[i] + b[j]);
+    if (i % 2 == 0){
+        if (k * (b[i] + b[j]) == a[j] - a[i])
+            return {2*k-1, 0};
+        ld x = a[i] - k*b[i], y = a[j] + k*b[j];
+        ld t = (y-x) / (ld)(b[i] + b[j]);
+        return {2*k, t};
+    }
+    if (k * (b[i] + b[j]) == a[j] - a[i])
+        return {2*k, 0};
+    ld x = a[i] - (k+1)*b[i], y = a[j] + (k+1)*b[j];
+    ld t = (y-x) / (ld)(b[i] + b[j]);
+    return {2*k+1, t};
+}
+
+int main(){
+
+    ios::sync_with_stdio(false);
+    cin.tie(0); cout.tie(0); cerr.tie(0);
+    int t; cin >> t;
+    while (t--){
+        cin >> n;
+        for (int i = 0; i < n; i++)
+            cin >> a[i];
+        for (int i = 0; i < n; i++)
+            cin >> b[i];
+        for (int i = 0; i < n; i++){
+            ans[i] = -1;
+            l[i] = i-1;
+            r[i] = i+1;
+        }
+        priority_queue<Str, vector<Str>, greater<Str> > pq;
+        auto Add = [&](int i, int j){
+            auto [num, time] = Calc(i, j);
+            Str obj;
+            obj.num = num; obj.time = time;
+            obj.i = i; obj.j = j;
+            pq.push(obj);
+        };
+        for (int i = 1; i < n; i++)
+            Add(i-1, i);
+        while (pq.size()){
+            Str obj = pq.top(); pq.pop();
+            int i = obj.i, j = obj.j;
+            if (ans[i] != -1 || ans[j] != -1) continue;
+            ans[i] = ans[j] = obj.num + (obj.time > 0 ? 1 : 0);
+            for (int t = 0; (1<<t) < n; t++)
+                ans[i] += t;
+            f[i] = 1;
+            if (l[i] != -1 && r[j] != n) Add(l[i], r[j]);
+            if (l[i] != -1) r[l[i]] = r[j];
+            if (r[j] != n) l[r[j]] = l[i];
+        }
+        for (int i = 0; i < n; i++){
+            if (f[i]){
+                for (int j = 0; (1<<j) < n; j++)
+                    ans[i] -= j;
+                f[i] = 0;
+            }
+        }
+        for (int i = 0; i < n; i++)
+            cout << ans[i] << (i < n-1 ? " " : "\n");
+    }
+    return 0;
+}
